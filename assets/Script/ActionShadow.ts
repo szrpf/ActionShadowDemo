@@ -98,6 +98,7 @@ export default class ActionShadow extends cc.Component {
         this.nodeOpacity = this.node.opacity;
         this.model = this.node.getComponent(cc.Animation);
         this.model && (this.model.currentClip = this.model.defaultClip);
+        this.node['_updateWorldMatrix']();
         this.updateShadowNum();
         this.updateDeltTime();
         this.updateShadowData();
