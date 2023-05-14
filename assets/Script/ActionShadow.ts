@@ -57,20 +57,20 @@ export default class ActionShadow extends cc.Component {
         this.updateShadowData();
     }
     @property()
-    private _shadowScale: number = 0.1;
-    @property({ min: 0, max: 1, step: 0.1, slide: true, displayName: CC_DEV && '尾部缩放系数' })
-    private get shadowScale(): number { return this._shadowScale; }
-    private set shadowScale(value: number) {
-        this._shadowScale = value;
-        this.updateShadowData();
-    }
-    @property()
     private _shadowColor: cc.Color = cc.color(255, 255, 255);
     @property({ displayName: CC_DEV && '残影颜色' })
     private get shadowColor(): cc.Color { return this._shadowColor; }
     private set shadowColor(value: cc.Color) {
         this._shadowColor = value;
         this.updateColor();
+    }
+    @property()
+    private _shadowScale: number = 0.1;
+    @property({ min: 0, max: 1, step: 0.1, slide: true, displayName: CC_DEV && '尾部缩放系数' })
+    private get shadowScale(): number { return this._shadowScale; }
+    private set shadowScale(value: number) {
+        this._shadowScale = value;
+        this.updateShadowData();
     }
     @property()
     private _opacity: number = 50;
@@ -133,8 +133,9 @@ export default class ActionShadow extends cc.Component {
             cur.frameTime = prev.frameTime;
         }
         let data = this.shadowData[0];
-        data.x = this.node.x;
-        data.y = this.node.y;
+        let matrix = this.node['_worldMatrix'].m;
+        data.x = matrix[12];
+        data.y = matrix[13];
         data.scaleX = this.node.scaleX;
         data.scaleY = this.node.scaleY;
         data.angle = this.node.angle;
@@ -142,11 +143,12 @@ export default class ActionShadow extends cc.Component {
             data.actionName = this.model.currentClip.name;
             data.frameTime = this.model.getAnimationState(data.actionName).time;
         }
+        matrix = this.shadowNode['_worldMatrix'].m;
         for (let i = this.shadowNum - 1; i >= 0; --i) {
             let node = this.shadowNode.children[i];
             data = this.shadowData[this.deltTime * (i + 1)];
-            node.x = data.x;
-            node.y = data.y;
+            node.x = data.x - matrix[12];
+            node.y = data.y - matrix[13];
             node.scaleX = data.scaleX * data.scale;
             node.scaleY = data.scaleY * data.scale;
             node.angle = data.angle;
@@ -180,10 +182,11 @@ export default class ActionShadow extends cc.Component {
 
     private updateShadowData() {
         let scaleDelt = (1 - this.shadowScale) / (this.shadowNum * this.deltTime);
+        let matrix = this.node['_worldMatrix'].m;
         for (let i = this.shadowNum * this.deltTime; i >= 0; --i) {
             let data = this.shadowData[i];
-            data.x = this.node.x;
-            data.y = this.node.y;
+            data.x = matrix[12];
+            data.y = matrix[13];
             data.scaleX = this.node.scaleX;
             data.scaleY = this.node.scaleY;
             data.scale = 1 - i * scaleDelt;
