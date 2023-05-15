@@ -86,12 +86,15 @@ export default class ActionShadow extends cc.Component {
     private shadowData: ShadowData[] = [];
 
     protected start() {
-        let shadowNodeName = 'ActionShadow_' + this.node.name;
+        let shadowNodeName = this.node.name + '<ActionShadow>';
         this.shadowNode = this.node.parent.getChildByName(shadowNodeName)
         if (!this.shadowNode) {
             this.shadowNode = new cc.Node(shadowNodeName);
             this.shadowNode.setParent(this.node.parent);
             this.shadowNode.setSiblingIndex(this.node.getSiblingIndex());
+        }
+        if (CC_EDITOR) {
+            this.shadowNode['_objFlags'] = 0;
             this.shadowNode['_objFlags'] |= cc.Object['Flags'].HideInHierarchy;
             this.shadowNode['_objFlags'] |= cc.Object['Flags'].LockedInEditor;
         }
@@ -163,7 +166,7 @@ export default class ActionShadow extends cc.Component {
         this.shadowNode.destroyAllChildren();
         for (let i = 0, len = this.shadowNum; i < len; ++i) {
             let node = cc.instantiate(this.node);
-            node.name = 'Shadow' + i;
+            node.name = `${this.node.name}${i}`;
             let cmps = node['_components'];
             for (let j = cmps.length - 1; j >= 0; --j) {
                 if (cmps[j] instanceof cc.RenderComponent) continue;
