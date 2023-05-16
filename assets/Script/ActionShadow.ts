@@ -73,7 +73,7 @@ export default class ActionShadow extends cc.Component {
         this.updateShadowData();
     }
     @property()
-    private _opacity: number = 50;
+    private _opacity: number = 100;
     @property({ type: cc.Integer, min: 0, max: 255, slide: true, displayName: CC_DEV && '透明度' })
     private get opacity(): number { return this._opacity; }
     private set opacity(value: number) {
@@ -87,7 +87,7 @@ export default class ActionShadow extends cc.Component {
 
     protected start() {
         let shadowNodeName = this.node.name + '<ActionShadow>';
-        this.shadowNode = this.node.parent.getChildByName(shadowNodeName)
+        this.shadowNode = this.node.parent.getChildByName(shadowNodeName);
         if (!this.shadowNode) {
             this.shadowNode = new cc.Node(shadowNodeName);
             this.shadowNode.setParent(this.node.parent);
@@ -147,6 +147,7 @@ export default class ActionShadow extends cc.Component {
             data.actionName = this.model.currentClip.name;
             data.frameTime = this.model.getAnimationState(data.actionName).time;
         }
+        this.shadowNode['_updateWorldMatrix']();
         matrix = this.shadowNode['_worldMatrix'].m;
         for (let i = this.shadowNum - 1; i >= 0; --i) {
             let node = this.shadowNode.children[i];
@@ -166,7 +167,7 @@ export default class ActionShadow extends cc.Component {
         this.shadowNode.destroyAllChildren();
         for (let i = 0, len = this.shadowNum; i < len; ++i) {
             let node = cc.instantiate(this.node);
-            node.name = `${this.node.name}${i}`;
+            node.name = this.node.name + i;
             let cmps = node['_components'];
             for (let j = cmps.length - 1; j >= 0; --j) {
                 if (cmps[j] instanceof cc.RenderComponent) continue;
